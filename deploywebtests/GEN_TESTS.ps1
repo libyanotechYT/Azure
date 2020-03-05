@@ -37,7 +37,7 @@ $jsonparams = [pscustomobject] @{
     '$schema'= "https://schema.management.azure.com/schemas/2015-01-01/deploymentParameters.json#";
     "contentVersion" = "1.0.0.0";
     "parameters" = [pscustomobject] @{
-    "appName" = [pscustomobject] @{"value" = "NOC-APPINSIGHT1"};
+    "appName" = [pscustomobject] @{"value" = "APPINSIGHT1"};
     "emails"= [pscustomobject] @{"value"= $emails};
     "tests" = [pscustomobject] @{"value" = $tests};
 
@@ -48,6 +48,15 @@ $jsonparams = [pscustomobject] @{
 $jsonparams | ConvertTo-Json -Depth 10 | out-file azuredeploy.parameters.json
 
 
+
+### Convert from Hashtable to JSON
+$jsonparams | ConvertTo-Json -Depth 10 | out-file azuredeploy.parameters.json
+
+
+
+### Deploy this thing
+Connect-AzureRmAccount
+New-AzureRmResourceGroupDeployment -ResourceGroupName **** -TemplateFile azuredeploy.json -TemplateParameterFile azuredeploy.parameters.json
 
 
 
