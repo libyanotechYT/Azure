@@ -12,7 +12,7 @@ id = $location
 }
 }
 
-### For each website in the CSV (or your data source of choice) create its respective test section within the parametres json
+### For each website in the CSV (or your data source of choice) create its respective test section within the parameters json
 foreach ($website in $csvwebsites){
 
 $name = $website | Select-String -Pattern '\/\/(.*?)\.' | %{$_.Matches.Groups[1].value}
@@ -32,7 +32,7 @@ $tests += [pscustomobject] @{
 
 }
 
-### Putting the parametres json all together ###
+### Putting the parameters json all together ###
 $jsonparams = [pscustomobject] @{
     '$schema'= "https://schema.management.azure.com/schemas/2015-01-01/deploymentParameters.json#";
     "contentVersion" = "1.0.0.0";
