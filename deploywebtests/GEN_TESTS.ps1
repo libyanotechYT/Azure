@@ -45,7 +45,7 @@ $jsonparams = [pscustomobject] @{
 }
 
 ### Convert from Hashtable to JSON
-$jsonparams | ConvertTo-Json -Depth 4 | out-file azuredeploy.parameters.json
+$jsonparams | ConvertTo-Json -Depth 10 | out-file azuredeploy.parameters.json
 
 
 
