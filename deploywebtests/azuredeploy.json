@@ -7,19 +7,20 @@
       "metadata": {
         "description": "The name of the app insights instance that you wish to create."
       }
-    },
+      },
     "tests": {
       "type": "array",
       "metadata": {
         "description": "The list of web tests to run. See the README for the schema of test descriptor object."
       }
     },
-    "emails": {
-      "type": "array",
-      "metadata": {
-        "description": "A list of strings representing the email addresses to send alerts to."
+    "actiongroupname": {
+           "type": "string",
+           "metadata": {
+        "description": "the actiongroupname used for alerts"
       }
     },
+
     "location": {
       "type": "string",
       "defaultValue": "[resourceGroup().location]",
@@ -36,7 +37,7 @@
       "type": "microsoft.insights/components",
       "location": "[parameters('location')]",
       "tags": {
-        "AppInsightsApp": "MyApp"
+        "AppInsightsApp": "[parameters('appName')]"
       },
       "properties": {
         "Application_Type": "web",
@@ -73,6 +74,84 @@
       }
     },
     {
+      "name": "[concat(parameters('tests')[0].name, 'alert')]",
+      "type": "Microsoft.Insights/metricAlerts",
+      "apiVersion": "2018-03-01",
+      "location": "global",
+      "dependsOn": [
+        "[concat('microsoft.insights/components/', parameters('appName'))]",
+        "[concat('microsoft.insights/webtests/', parameters('tests')[0].name)]"
+      ],
+      "tags": {
+        "[concat('hidden-link:', resourceId('microsoft.insights/components/', parameters('appName')))]": "Resource",
+        "[concat('hidden-link:', resourceId('microsoft.insights/webtests/', parameters('tests')[0].name))]": "Resource"
+      },
+      "properties": {
+        "description": "[parameters('tests')[0].description]",
+        "severity": 1,
+        "enabled": true,
+        "scopes": [
+          "[resourceId('microsoft.insights/webtests/', parameters('tests')[0].name)]",
+          "[resourceId('Microsoft.Insights/components',parameters('appName'))]"
+        ],
+        "evaluationFrequency": "PT1M",
+        "windowSize": "PT5M",
+        "templateType": 0,
+        "criteria": {
+          "odata.type": "Microsoft.Azure.Monitor.WebtestLocationAvailabilityCriteria",
+          "webTestId": "[resourceId('microsoft.insights/webtests/', parameters('tests')[0].name)]",
+          "componentId": "[resourceId('Microsoft.Insights/components', parameters('appName'))]",
+          "failedLocationCount": 1
+        },
+        "actions": [
+          {
+            "actionGroupId": "[resourceId('Microsoft.Insights/actiongroups', parameters('actiongroupname'))]"
+          }
+        ]
+      }
+    },
+        {
+      "name": "[concat(parameters('tests')[copyIndex(1)].name, 'alert')]",
+      "type": "Microsoft.Insights/metricAlerts",
+      "apiVersion": "2018-03-01",
+      "location": "global",
+      "dependsOn": [
+        "[concat('microsoft.insights/components/', parameters('appName'))]",
+        "createTests"
+      ],
+      "tags": {
+        "[concat('hidden-link:', resourceId('microsoft.insights/components/', parameters('appName')))]": "Resource",
+        "[concat('hidden-link:', resourceId('microsoft.insights/webtests/', parameters('tests')[copyIndex(1)].name))]": "Resource"
+      },
+      "properties": {
+        "description": "[parameters('tests')[copyIndex(1)].description]",
+        "severity": 1,
+        "enabled": true,
+        "scopes": [
+          "[resourceId('microsoft.insights/webtests/', parameters('tests')[copyIndex()].name)]",
+          "[resourceId('Microsoft.Insights/components',parameters('appName'))]"
+        ],
+        "evaluationFrequency": "PT1M",
+        "windowSize": "PT5M",
+        "templateType": 0,
+        "criteria": {
+          "odata.type": "Microsoft.Azure.Monitor.WebtestLocationAvailabilityCriteria",
+          "webTestId": "[resourceId('microsoft.insights/webtests/', parameters('tests')[copyIndex()].name)]",
+          "componentId": "[resourceId('Microsoft.Insights/components', parameters('appName'))]",
+          "failedLocationCount": 1
+        },
+        "actions": [
+          {
+            "actionGroupId": "[resourceId('Microsoft.Insights/actiongroups', parameters('actiongroupname'))]"
+          }
+        ]
+      },
+      "copy": {
+        "name": "createAlerts",
+        "count": "[sub(length(parameters('tests')), 1)]"
+      }
+    },
+   {
       "name": "[parameters('tests')[copyIndex(1)].name]",
       "apiVersion": "2015-05-01",
       "type": "microsoft.insights/webtests",
