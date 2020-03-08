@@ -41,7 +41,7 @@ foreach ($website in $csvwebsites){
 
 $counter++ ### Every website processed increment counter
 
-$name = $website | Select-String -Pattern '\/\/(.*?)\.' | %{$_.Matches.Groups[1].value}  ### Extract name from the domain name
+$name = $website.urls | Select-String -Pattern '\/\/(.*?)\.' | %{$_.Matches.Groups[1].value}  ### Extract name from the domain name
 
 $tests += [pscustomobject] @{  ### Build a hashtable of the webtest
 "name"= $name;
